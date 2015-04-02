@@ -52,7 +52,9 @@ exports.updateAlbumByID = function (title, homepic, contents, albumId, callback)
         album.title = title;
         album.home_pic = homepic;
         album.contents = contents;
-        album.save(callback);
+        album.save(function (err) {
+            callback(err, album);
+        });
     });
 };
 
@@ -78,7 +80,35 @@ exports.newAndSave = function (title, homepic, contents, user_id, callback) {
     var album = new Album();
     album.title = title;
     album.home_pic = homepic;
+
+    //contents.forEach(function (id, i) {
+    //    album.contents.push(id);
+    //});
     album.contents = contents;
+
     album.user_id = user_id;
-    album.save(callback);
+    album.save(function (err) {
+        callback(err, album);
+    });
+};
+
+/**
+ * 根据专辑ID，专辑回复
+ * Callback:
+ * - err, 数据库异常
+ * - album, 专辑内容
+ * @param {String} id 专辑ID
+ * @param {Function} callback 回调函数
+ */
+exports.getAlbumById = function (albumid, callback) {
+    Album.findOne({_id: albumid}, function (err, album) {
+        if (err) {
+            return callback(err);
+        }
+        if (!album) {
+            return callback(err, null);
+        }
+
+        return callback(err, album);
+    });
 };

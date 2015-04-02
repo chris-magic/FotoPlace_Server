@@ -33,7 +33,7 @@ router.get('/message/count', middleware.auth, messageController.count);
 router.post('/message/mark_all', middleware.auth, messageController.markAll);
 
 // 专辑
-router.get('/albums/:user_id', albumController.getAlbumList);
+router.post('/albums/list', middleware.auth, albumController.getAlbumList);
 router.post('/albums/add', middleware.auth, albumController.addAlbum);
 router.post('/albums/update', middleware.auth, albumController.updateAlbum);
 router.post('/albums/del', middleware.auth, albumController.delAlbum);

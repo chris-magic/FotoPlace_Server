@@ -12,7 +12,7 @@ var renderHelper = require('../../common/render_helper');
 var validator = require('validator');
 
 var getAlbumList = function (req, res, next) {
-    var userId = req.params.user_id;
+    var userId = req.body.user_id;
     var ep = new eventproxy();
     ep.fail(next);
     AlbumProxy.getAlbumsByUserId(userId, ep.done('album_list', function (docs) {
@@ -20,9 +20,11 @@ var getAlbumList = function (req, res, next) {
     }));
 
     ep.all('album_list', function (unread) {
-        res.send({
-            success: true,
-            album_list: unread
+        res.send(
+            {
+            status: "0",
+            error:"no error",
+            data:{album_list: unread}
         });
     });
 }
@@ -38,8 +40,9 @@ var addAlbum = function (req, res, next) {
     title = validator.escape(title);
     var home_pic = validator.trim(body.home_pic);
     home_pic = validator.escape(home_pic);
-    var contents = validator.trim(body.contents);
-    contents = validator.escape(contents);
+    //var contents = validator.trim(body.contents);
+    //contents = validator.escape(contents);
+    var contents = body.contents;
 
     // 得到所有的 pic url, e.g. ['1.png', '2.png', ..]
     //var allTabs = contents.map(function (tPair) {
@@ -65,6 +68,7 @@ var addAlbum = function (req, res, next) {
     if (editError) {
         res.status(422);
         return res.send({
+            status:"-1",
             error_msg: editError
         });
     }
@@ -75,10 +79,10 @@ var addAlbum = function (req, res, next) {
         }
 
         if (album) {
-            //res.json({success: true});
             res.send({
-                success: true,
-                album_id: album.album_id
+                status: "0",
+                error:"no error",
+                data:{album_id: album._id}
             });
             return;
 
@@ -96,8 +100,10 @@ var updateAlbum = function (req, res, next) {
     title = validator.escape(title);
     var home_pic = validator.trim(body.home_pic);
     home_pic = validator.escape(home_pic);
-    var contents = validator.trim(body.contents);
-    contents = validator.escape(contents);
+    //var contents = validator.trim(body.contents);
+    //contents = validator.escape(contents);
+
+    var contents = body.contents;
 
     // 验证
     var editError;
@@ -118,7 +124,8 @@ var updateAlbum = function (req, res, next) {
     if (editError) {
         res.status(422);
         return res.send({
-            error_msg: editError
+            status: "-1",
+            error: editError
         });
     }
 
@@ -128,10 +135,10 @@ var updateAlbum = function (req, res, next) {
         }
 
         if (album) {
-            //res.json({success: true});
             res.send({
-                success: true,
-                album_id: album.album_id
+                status: "0",
+                error:"no error",
+                data:{album_id: album._id}
             });
             return;
 
@@ -153,8 +160,51 @@ var delAlbum = function (req, res, next) {
         }
 
         res.send({
-            success: true
+            status: "0",
+            error:"no error"
         });
     });
 }
 exports.delAlbum = delAlbum;
+
+
+var insertAlbum = function (req, res, next) {
+    var albumId = req.body.album_id;
+    var postId = req.body.post_id;
+
+    AlbumProxy.getAlbumById(albumId, function (err, album) {
+        if (err) {
+            return next(err);
+        }
+        if (!album) {
+            res.status(404);
+            return res.send({
+                status: "-1",
+                error: 'reply `' + albumId + '` not found',
+                data:{album_id: album._id}
+            });
+        }
+
+        album.contents = album.contents || [];
+        var upIndex = album.contents.indexOf(postId);
+        if (upIndex === -1) {
+            album.contents.push(postId);
+        } else {
+            // 不能帮自己点赞
+            res.send({
+                status: "-1",
+                error: '专辑中已经存在此帖子。',
+                data:{album_id: album._id}
+            });
+        }
+        album.save(function () {
+            res.send({
+                status: "0",
+                error: 'no error'
+            });
+        });
+
+    });
+};
+
+exports.insertAlbum = insertAlbum;

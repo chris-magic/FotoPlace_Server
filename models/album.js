@@ -23,7 +23,7 @@ var _ = require('lodash');
 var AlbumSchema = new Schema({
     title: {type: String},
     home_pic:{type: String},
-    contents: [String],
+    contents: {type:Array},
     user_id: {type: String},
     album_id: {type: ObjectId},
     reply_count: {type: Number, default: 0},
