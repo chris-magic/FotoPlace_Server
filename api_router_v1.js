@@ -37,5 +37,6 @@ router.post('/albums/list', middleware.auth, albumController.getAlbumList);
 router.post('/albums/add', middleware.auth, albumController.addAlbum);
 router.post('/albums/update', middleware.auth, albumController.updateAlbum);
 router.post('/albums/del', middleware.auth, albumController.delAlbum);
+router.post('/albums/insert', middleware.auth, albumController.insertAlbum);
 
 module.exports = router;
